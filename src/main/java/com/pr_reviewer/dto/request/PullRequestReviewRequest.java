@@ -1,27 +1,21 @@
 package com.pr_reviewer.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
-import lombok.*;
 
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
-public class PullRequestReviewRequest {
 
-    @NotBlank
-    private String repositoryOwner;
+public record PullRequestReviewRequest(
 
-    @NotBlank
-    private String repositoryName;
+        @NotBlank
+        String repositoryOwner,
 
-    @NotNull
-    @Positive
-    private Integer pullRequestNumber;
+        @NotBlank
+        String repositoryName,
 
-    @NotBlank
-    private String githubToken;
-}
+        @Positive
+        Integer pullRequestNumber,
+
+        @NotBlank
+        String githubToken
+
+) {}

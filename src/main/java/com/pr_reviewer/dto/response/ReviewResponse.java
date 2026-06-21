@@ -1,24 +1,14 @@
 package com.pr_reviewer.dto.response;
 
 import com.pr_reviewer.entity.ReviewRequestStatus;
-import lombok.*;
 
 import java.util.List;
 
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
-public class ReviewResponse {
+public record ReviewResponse (
 
-    private Long reviewId;
-
-    private ReviewRequestStatus reviewStatus;
-
-    private Long processingTimeMs;
-
-    private Integer totalComments;
-
-    private List<ReviewCommentResponse> comments;
-}
+   Long reviewId,
+   ReviewRequestStatus reviewStatus,
+   Long processingTimeMs,
+   Integer totalComments,
+   List<ReviewCommentResponse> comments)
+{}
