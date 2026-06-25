@@ -2,12 +2,15 @@ spring:
   application:
     name: PR_Reviewer
 
-datasource:
-  url: jdbc:postgresql://localhost:5432/pr_reviewer
-  username: postgres
-  password: Postgres@54321
+  datasource:
+    url: jdbc:postgresql://localhost:5432/pr_reviewer
+    username: postgres
+    password: Postgre@54321
 
-jpa:
-  hibernate:
-    ddl-auto: update
-    show-sql: true
+  jpa:
+    hibernate:
+      ddl-auto: update
+      show-sql: true
+github:
+  api:
+    base-url: https://api.github.com
