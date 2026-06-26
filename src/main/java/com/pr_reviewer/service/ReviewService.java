@@ -3,9 +3,11 @@ package com.pr_reviewer.service;
 import com.pr_reviewer.dto.request.ReviewRequest;
 import com.pr_reviewer.dto.response.ReviewResponse;
 import com.pr_reviewer.integration.github.GitHubClient;
+import com.pr_reviewer.models.ChangedFile;
 import com.pr_reviewer.models.PullRequestDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -20,7 +22,10 @@ public class ReviewService {
                 request.pullRequestNumber(),
                 request.githubToken()
         );
+        List<ChangedFile> files =
+                gitHubClient.getChangedFiles(request.owner(), request.repository(),
+                        request.pullRequestNumber(), request.githubToken());
 
-        return new ReviewResponse(details);
+        return new ReviewResponse(details, files);
     }
 }

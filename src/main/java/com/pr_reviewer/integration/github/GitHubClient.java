@@ -1,12 +1,17 @@
 package com.pr_reviewer.integration.github;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.pr_reviewer.integration.github.dto.GitHubFileResponse;
 import com.pr_reviewer.integration.github.dto.GitHubPullRequestResponse;
+import com.pr_reviewer.models.ChangedFile;
 import com.pr_reviewer.models.PullRequestDetails;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
+
+import java.util.List;
 
 @Component
 @RequiredArgsConstructor
@@ -61,6 +66,42 @@ public class GitHubClient {
                 response.source().ref(),
                 response.target().ref(),
                 response.source().sha());//Last commit that Ai should Review
+
+    }
+
+    public List<ChangedFile> getChangedFiles(
+            String owner,
+            String repo,
+            Integer pullRequestNumber,
+            String token
+    ){
+        List<GitHubFileResponse> response = restClient.get()
+                        .uri(uriBuilder -> uriBuilder
+                                        .path("/repos/{owner}/{repo}/pulls/{number}/files")
+                                        .build(owner, repo, pullRequestNumber))
+                        .header("Authorization", "Bearer " + token)
+                        .retrieve()
+                        .body(new ParameterizedTypeReference<>() {});
+                        // Java removes generic types at runtime (Type Erasure).
+                        // ParameterizedTypeReference tells Spring this JSON array
+                        // should be deserialized into List<GitHubFileResponse>.
+        if (response == null) {
+            return List.of();
+        }
+        return response.stream()
+                .map(this::mapToChangedFile)
+                .toList();
+    }
+
+    private ChangedFile mapToChangedFile(
+            GitHubFileResponse response
+    ) { return new ChangedFile(
+            response.filename(),
+            response.status(),
+            response.addition(),
+            response.deletion(),
+            response.patch()
+        );
 
     }
 }
