@@ -1,4 +1,10 @@
 package com.pr_reviewer.integration.ai.dto;
 
-public class AiResponse {
-}
+import java.util.List;
+
+public record AiResponse(
+        String id,
+        List<Choice> choices,
+        Usage usage
+
+) {}

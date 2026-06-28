@@ -1,11 +1,28 @@
+
+server:
+  port: 8080
+
 spring:
   application:
     name: PR_Reviewer
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/pr_reviewer
-    username: postgres
-    password: Postgre@54321
+    url: ${DB_URL:}
+    username: ${DB_USERNAME:}
+    password: ${DB_PASSWORD:}
+    driver-class-name: org.postgresql.Driver
+
+
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 5
+      connection-timeout: 30000
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+
+
 
   jpa:
     hibernate:
@@ -16,6 +33,6 @@ github:
     base-url: https://api.github.com
 ai:
   openrouter:
-    base-url: https://openrouter.ai/api/v1
-    api-key: ${OPENROUTER_API_KEY}
-    model: qwen/qwen3-32b
+    base-url: https://openrouter.ai/api/v1/chat/completions
+    api-key: ${OPENROUTER_API_KEY:}
+    model: openrouter/free

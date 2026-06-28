@@ -27,38 +27,41 @@ public class PromptBuilder {
 
     private void appendHeader(StringBuilder prompt) {
         prompt.append("""
-                You are an experienced Senior Java Backend Engineer.
-                Review the following Pull Request like a professional code reviewer.
-                """);
+        You are a Senior Java Backend Engineer performing a professional Pull Request review.
+        Your responsibility is to review ONLY the code provided.
+        Never assume the existence or contents of files that are not included.
+        If there is insufficient context to determine whether something is an issue, do not report it.""");
     }
 
     private void appendTask(StringBuilder prompt) {
+
         prompt.append("""
-                ## Task
-                Analyze the code for:
-                - Bugs
-                - Security Issues
-                - Performance Issues
-                - Readability
-                - Maintainability
-                - Best Practices
-                - Possible Edge Cases
-                """);
+        ## Task
+        Review the modified code for:
+        - Bugs
+        - Security Issues
+        - Performance Problems
+        - Maintainability
+        - Readability
+        - Best Practices
+        - Edge Cases
+        Report only real problems.
+        """);
     }
 
     private void appendRules(StringBuilder prompt) {
         prompt.append("""
-                ## Rules
-                - Do not invent issues.
-                - Only review modified code.
-                - Avoid duplicate comments.
-                - Keep comments concise.
-                - Explain why something is an issue.
-                - Suggest an improved implementation.
-                - Return ONLY valid JSON.
-                """);
+        ## Rules
+        - Review ONLY the supplied diff.
+        - Do NOT guess missing code.
+        - Do NOT invent issues.
+        - Ignore formatting unless it affects readability.
+        - Do not report duplicate issues.
+        - Explain WHY each issue is a problem.
+        - Provide a practical suggestion.
+        - If no issues exist, return an empty comments array.
+        """);
     }
-
     private void appendMetadata(
             StringBuilder prompt,
             PullRequestDetails details
@@ -90,7 +93,6 @@ public class PromptBuilder {
     ) {
         prompt.append("""
                 ## Changed Files
-
                 """);
 
         for (ChangedFile file : files) {
@@ -118,6 +120,39 @@ public class PromptBuilder {
             prompt.append("\n\n");
         }
     }
+//    private void appendOutputFormat(StringBuilder prompt) {
+//
+//        prompt.append("""
+//        ## Response Requirements
+//        Return ONLY a valid JSON object.
+//        Do NOT use markdown.
+//        Do NOT wrap the response with ```json.
+//        Do NOT add explanations.
+//        Do NOT add text before or after the JSON.
+//        Do NOT add fields that are not present in the schema.
+//
+//        Use this EXACT schema:
+//        {
+//          "summary": "Overall review summary",
+//          "comments": [
+//            {
+//              "fileName": "",
+//              "lineNumber": 0,
+//              "severity": "LOW",
+//              "category": "BUG",
+//              "comment": "",
+//              "suggestion": ""
+//            }
+//          ]
+//        }
+//
+//        If no issues are found:
+//        {
+//          "summary": "No issues found.",
+//          "comments": []
+//        }
+//        """);
+//    }
 
     private void appendOutputFormat(StringBuilder prompt) {
 
@@ -136,10 +171,14 @@ public class PromptBuilder {
                     }
                   ]
                 }
-                Return ONLY the JSON object.
-                Do not include markdown.
-                Do not include explanations outside the JSON.
+                Return ONLY a valid JSON object.
+                Do NOT wrap the response inside markdown.
+                Never wrap with ```json.
+                Never explain the result.
+                Do NOT write introductory text.
+                Never add extra fields.
+                The response MUST exactly match this schema:
 
-                """);
+               """);
     }
 }

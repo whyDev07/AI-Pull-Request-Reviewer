@@ -1,4 +1,10 @@
 package com.pr_reviewer.integration.ai.dto;
 
-public class AiRequest {
-}
+import java.util.List;
+
+public record AiRequest(
+        String model,
+        List<AiMessage> messages
+
+) {}
+
