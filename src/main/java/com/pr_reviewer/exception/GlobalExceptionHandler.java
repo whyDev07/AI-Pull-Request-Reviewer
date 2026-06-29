@@ -1,5 +1,6 @@
 package com.pr_reviewer.exception;
 
+import com.pr_reviewer.integration.ai.AiException;
 import com.pr_reviewer.integration.github.GitHubException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,14 +16,32 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiErrorResponse> handleGitHubException(
             GitHubException ex) {
 
-        ApiErrorResponse error =
-                new ApiErrorResponse(
-                        LocalDateTime.now(),
-                        HttpStatus.BAD_GATEWAY.value(),
-                        "GitHub API Error",
-                        ex.getMessage());
+        ApiErrorResponse error = ApiErrorResponse.builder()
+                .timestamp(LocalDateTime.now())
+                .status(ex.getStatus().value())
+                .error(ex.getStatus().getReasonPhrase())
+                .message(ex.getMessage())
+                .build();
+
         return ResponseEntity
-                .status(HttpStatus.BAD_GATEWAY)
+                .status(ex.getStatus())
+                .body(error);
+    }
+
+
+    @ExceptionHandler(AiException.class)
+    public ResponseEntity<ApiErrorResponse> handleAiException(
+            AiException ex) {
+
+        ApiErrorResponse error = ApiErrorResponse.builder()
+                .timestamp(LocalDateTime.now())
+                .status(ex.getStatus().value())
+                .error(ex.getStatus().getReasonPhrase())
+                .message(ex.getMessage())
+                .build();
+
+        return ResponseEntity
+                .status(ex.getStatus())
                 .body(error);
     }
 }

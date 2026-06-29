@@ -18,40 +18,37 @@ public class ReviewParser {
 
     public ReviewResult parse(AiResponse response) {
 
-        if (response == null) {
+        if (response == null)
             throw new AiException("AI returned no response.");
-        }
-
-        if (response.choices() == null || response.choices().isEmpty()) {
+        if (response.choices() == null || response.choices().isEmpty())
             throw new AiException("AI returned no choices.");
-        }
+        if (response.choices().getFirst().message() == null)
+            throw new AiException("AI returned no message.");
 
-        String json = response.choices()
+        String json = response.choices().getFirst().message().content();
+
+        if (json == null || json.isBlank())
+            throw new AiException("AI returned empty content.");
+
+        json = response.choices()
                 .getFirst()
                 .message()
                 .content();
 
-        json = json.replace("```json", "")
-                .replace("```", "")
-                .trim();
-
         try {
-
-            ReviewResult result = objectMapper.readValue(
-                    json,
-                    ReviewResult.class);
-//            if(result == null){
-//                result = new ReviewResult(result.summary(), List.of());
-//            }
-            return result;
-
+            json = json.replace("```json", "")
+                    .replace("```", "")
+                    .trim();
+            return objectMapper.readValue(json, ReviewResult.class);
         }
         catch (JsonProcessingException e) {
-
             throw new AiException(
                     "Failed to parse AI response: "
-                            + e.getOriginalMessage()
-            );
+                            + e.getOriginalMessage());
+        }catch (Exception e){
+            throw new AiException("Failed to parse Ai response : " +
+                                      e.getMessage());
         }
+
     }
 }

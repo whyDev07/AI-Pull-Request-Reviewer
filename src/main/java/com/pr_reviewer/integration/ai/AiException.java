@@ -1,9 +1,12 @@
 package com.pr_reviewer.integration.ai;
 
-public class AiException extends RuntimeException {
+import com.pr_reviewer.exception.ApiException;
+import org.springframework.http.HttpStatus;
 
-    public AiException(String message) {
-        super(message);
+public class AiException extends ApiException {
+
+    public AiException(HttpStatus status, String message) {
+        super(status , message);
     }
 
 }

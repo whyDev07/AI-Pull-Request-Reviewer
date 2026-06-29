@@ -1,14 +1,12 @@
 package com.pr_reviewer.integration.github;
 
-import lombok.Getter;
 
-@Getter
-public class GitHubException extends RuntimeException {
+import com.pr_reviewer.exception.ApiException;
+import org.springframework.http.HttpStatus;
 
-    private final int statusCode;
+public class GitHubException extends ApiException {
 
-    public GitHubException(int statusCode, String message){
-        super(message);
-        this.statusCode = statusCode;
+    public GitHubException(HttpStatus statusCode, String message){
+        super(statusCode,message);
     }
 }

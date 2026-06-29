@@ -7,6 +7,7 @@ import com.pr_reviewer.models.ChangedFile;
 import com.pr_reviewer.models.PullRequestDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
@@ -38,14 +39,14 @@ public class GitHubClient {
                     (request, response) -> {
                         int status = response.getStatusCode().value();
                         switch (status) {
-                            case 401 ->
-                                    throw new GitHubException(status ,"Invalid GitHub Personal Access Token.");
-                            case 403 ->
-                                    throw new GitHubException(status,"GitHub rate limit exceeded or access forbidden.");
-                            case 404 ->
-                                    throw new GitHubException(status,"Repository or Pull Request not found.");
-                            default ->
-                                    throw new GitHubException(status, "GitHub API Error : HTTP " + status);
+                            case 401 -> throw new GitHubException
+                                    (HttpStatus.UNAUTHORIZED, "Invalid GitHub Personal Access Token.");
+                            case 403 -> throw new GitHubException
+                                    (HttpStatus.FORBIDDEN, "GitHub rate limit exceeded or access forbidden.");
+                            case 404 -> throw new GitHubException
+                                    (HttpStatus.NOT_FOUND, "Repository or Pull Request not found.");
+                            default -> throw new GitHubException
+                                    (HttpStatus.BAD_GATEWAY, "GitHub API Error : HTTP " + status);
                         }
                     })
                 .body(GitHubPullRequestResponse.class); //Jackson will automatically map it
