@@ -19,7 +19,7 @@ public class ReviewComment {
     private String fileName;
 
     @Column(nullable = false)
-    private Long lineNumber;
+    private Integer lineNumber;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

@@ -26,7 +26,10 @@ public class ReviewParser {
         if (response.choices().getFirst().message() == null)
             throw new AiException(HttpStatus.BAD_GATEWAY,"AI returned no message.");
 
-        String json = response.choices().getFirst().message().content();
+        String json = response.choices()
+                .getFirst()
+                .message()
+                .content();
 
         if (json == null || json.isBlank())
             throw new AiException(HttpStatus.BAD_GATEWAY,"AI returned empty content.");

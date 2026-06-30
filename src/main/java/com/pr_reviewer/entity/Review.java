@@ -45,4 +45,13 @@ public class Review {
             orphanRemoval = true
     )
     private List<ReviewComment> comments = new ArrayList<>();
+
+    @Column(nullable = false, length = 5000)
+    private String summary;
+
+    private Integer promptTokens;
+
+    private Integer completionTokens;
+
+    private Integer totalTokens;
 }
