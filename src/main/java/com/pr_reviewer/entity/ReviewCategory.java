@@ -2,10 +2,14 @@ package com.pr_reviewer.entity;
 
 public enum ReviewCategory {
     BUG,
-    PERFORMANCE,
     SECURITY,
+    PERFORMANCE,
+    MAINTAINABILITY,
+    READABILITY,
     STYLE,
     BEST_PRACTICE,
     NULL_POINTER,
-    CONCURRENCY
+    CONCURRENCY,
+    DOCUMENTATION
+
 }
