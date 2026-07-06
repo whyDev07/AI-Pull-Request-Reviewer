@@ -75,16 +75,25 @@ public class ReviewService {
                                         pullRequestMapper.toEntity(details, request)));
         long processingTime = System.currentTimeMillis() - start;
         Review review = reviewMapper.toEntity(
-                        pullRequest,
-                        result,
-                        aiResponse,
-                        aiProperties.getModel(),
-                        processingTime);
+                pullRequest,
+                result,
+                aiResponse,
+                aiProperties.getModel(),
+                processingTime);
         reviewRepository.save(review);
 
         reviewCommentRepository.saveAll(reviewMapper.toComments(review, result.comments()));
 
         return result;
 
+    }
+
+    //Creating an overload for the webhooks as it doesn't need Review request
+    public ReviewResult pullRequestReview(String owner, String repository,
+                                          Integer prNumber, String githubToken)
+    {
+        ReviewRequest request = new ReviewRequest(owner, repository,
+                                                    prNumber, githubToken);
+        return pullRequestReview(request);
     }
 }
