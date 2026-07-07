@@ -38,7 +38,15 @@ public class ReviewParser {
             json = json.replace("```json", "")
                     .replace("```", "")
                     .trim();
-            return objectMapper.readValue(json, ReviewResult.class);
+            ReviewResult parsed = objectMapper.readValue(json, ReviewResult.class);
+
+            if (parsed.summary() == null || parsed.summary().isBlank()) {
+                throw new AiException(
+                        HttpStatus.BAD_GATEWAY,
+                        "AI returned an invalid review: missing summary."
+                );
+            }
+            return parsed;
         }
         catch (JsonProcessingException e) {
             throw new AiException(HttpStatus.INTERNAL_SERVER_ERROR,"Failed to parse AI response: " + e.getOriginalMessage());

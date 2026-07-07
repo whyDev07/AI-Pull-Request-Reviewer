@@ -1,6 +1,6 @@
 package com.pr_reviewer.controller;
 
-import com.pr_reviewer.integration.github.webhook.whDto.GitHubWebhookPayload;
+import com.pr_reviewer.integration.github.webhook.dto.GitHubWebhookPayload;
 import com.pr_reviewer.service.GitHubWebhookService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

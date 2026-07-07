@@ -1,7 +1,7 @@
 package com.pr_reviewer.service;
 
 import com.pr_reviewer.integration.github.GitHubProperties;
-import com.pr_reviewer.integration.github.webhook.whDto.GitHubWebhookPayload;
+import com.pr_reviewer.integration.github.webhook.dto.GitHubWebhookPayload;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

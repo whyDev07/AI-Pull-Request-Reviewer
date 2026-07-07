@@ -15,6 +15,7 @@ import com.pr_reviewer.models.ReviewResult;
 import com.pr_reviewer.repository.PullRequestRepo;
 import com.pr_reviewer.repository.ReviewCommentRepo;
 import com.pr_reviewer.repository.ReviewRepo;
+import com.pr_reviewer.service.ai.AiOutputValidator;
 import com.pr_reviewer.service.ai.PromptBuilder;
 import com.pr_reviewer.service.ai.ReviewParser;
 import lombok.RequiredArgsConstructor;
@@ -42,6 +43,7 @@ public class ReviewService {
     private final ReviewMapper reviewMapper;
 
     private final AiProperties aiProperties;
+    private final AiOutputValidator aiOutputValidator;
 
     public ReviewResult pullRequestReview(ReviewRequest request) {
 
@@ -65,6 +67,7 @@ public class ReviewService {
         AiResponse aiResponse = aiClient.reviewCode(prompt);
 
         ReviewResult result = reviewParser.parse(aiResponse);
+        aiOutputValidator.validate(result);
 
         //Saving all the changes in db
         PullRequest pullRequest =

@@ -171,14 +171,40 @@ public class PromptBuilder {
                     }
                   ]
                 }
-                Return ONLY a valid JSON object.
-                Do NOT wrap the response inside markdown.
-                Never wrap with ```json.
-                Never explain the result.
-                Do NOT write introductory text.
-                Never add extra fields.
-                The response MUST exactly match this schema:
-
+                The response MUST be a SINGLE valid JSON object.
+                The "summary" field is REQUIRED.
+                The "comments" field is REQUIRED.
+                If there are no issues:
+                 {
+                   "summary": "No issues found.",
+                   "comments": []
+                 }
+                 Allowed severity values ONLY:
+                 LOW
+                 MEDIUM
+                 HIGH
+                 CRITICAL
+                 Allowed category values ONLY:
+                 BUG
+                 SECURITY
+                 PERFORMANCE
+                 STYLE
+                 MAINTAINABILITY
+                 Never use any other values.
+                 Return JSON only.
+              
+                 Do not wrap in markdown.
+                 Never wrap with ```json.
+                 Do not explain anything.
+                 The response MUST exactly match this schema:
+                 The "summary" field is REQUIRED.
+                 Never omit it.
+                 Even if no issues are found, return:
+                 {
+                   "summary": "No issues found.",
+                   "comments": []
+                 }
+                 If issues are found, you MUST still include the "summary" field.
                """);
     }
 }
