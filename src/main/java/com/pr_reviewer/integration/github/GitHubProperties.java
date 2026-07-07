@@ -2,6 +2,7 @@ package com.pr_reviewer.integration.github;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
@@ -12,5 +13,5 @@ import org.springframework.stereotype.Component;
 public class GitHubProperties {
 
     private String baseUrl;
-
+    private String token;
 }

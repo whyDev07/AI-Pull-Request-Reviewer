@@ -4,12 +4,17 @@ import com.pr_reviewer.entity.*;
 import com.pr_reviewer.integration.ai.dto.AiResponse;
 import com.pr_reviewer.models.AiReviewComment;
 import com.pr_reviewer.models.ReviewResult;
+import com.pr_reviewer.service.ai.EnumMapper;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 
+@RequiredArgsConstructor
 @Component
 public class ReviewMapper {
+
+    private final EnumMapper enumMapper;
 
     public Review toEntity(
             PullRequest pullRequest,
@@ -46,8 +51,8 @@ public class ReviewMapper {
                                 .review(review)
                                 .fileName(comment.fileName())
                                 .lineNumber(comment.lineNumber())
-                                .severity(Severity.valueOf(comment.severity().toUpperCase()))
-                                .reviewCategory(ReviewCategory.valueOf(comment.category().toUpperCase()))
+                                .severity(enumMapper.severity(comment.severity()))
+                                .reviewCategory(enumMapper.category(comment.category()))
                                 .comment(comment.comment())
                                 .suggestion(comment.suggestion())
                                 .build())
