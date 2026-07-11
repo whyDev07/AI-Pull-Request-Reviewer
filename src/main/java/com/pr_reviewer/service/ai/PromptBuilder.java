@@ -120,91 +120,66 @@ public class PromptBuilder {
             prompt.append("\n\n");
         }
     }
-//    private void appendOutputFormat(StringBuilder prompt) {
-//
-//        prompt.append("""
-//        ## Response Requirements
-//        Return ONLY a valid JSON object.
-//        Do NOT use markdown.
-//        Do NOT wrap the response with ```json.
-//        Do NOT add explanations.
-//        Do NOT add text before or after the JSON.
-//        Do NOT add fields that are not present in the schema.
-//
-//        Use this EXACT schema:
-//        {
-//          "summary": "Overall review summary",
-//          "comments": [
-//            {
-//              "fileName": "",
-//              "lineNumber": 0,
-//              "severity": "LOW",
-//              "category": "BUG",
-//              "comment": "",
-//              "suggestion": ""
-//            }
-//          ]
-//        }
-//
-//        If no issues are found:
-//        {
-//          "summary": "No issues found.",
-//          "comments": []
-//        }
-//        """);
-//    }
-
     private void appendOutputFormat(StringBuilder prompt) {
 
         prompt.append("""
-                ## Expected JSON Response
+            ## OUTPUT
+            Return ONLY ONE JSON object.
+            Do not write markdown.
+            Do not write explanations.
+            Do not write ```json.
+
+            The JSON MUST EXACTLY match this schema.
+            {
+              "summary": "Overall review summary",
+              "comments": [
                 {
-                  "summary": "Overall review summary",
-                  "comments": [
-                    {
-                      "fileName": "",
-                      "lineNumber": 0,
-                      "severity": "LOW | MEDIUM | HIGH | CRITICAL",
-                      "category": "BUG | SECURITY | PERFORMANCE | STYLE | MAINTAINABILITY",
-                      "comment": "",
-                      "suggestion": ""
-                    }
-                  ]
+                  "fileName": "src/File.java",
+                  "lineNumber": 10,
+                  "severity": "LOW",
+                  "category": "BUG",
+                  "comment": "Explain the problem.",
+                  "suggestion": "Explain the fix."
                 }
-                The response MUST be a SINGLE valid JSON object.
-                The "summary" field is REQUIRED.
-                The "comments" field is REQUIRED.
-                If there are no issues:
-                 {
-                   "summary": "No issues found.",
-                   "comments": []
-                 }
-                 Allowed severity values ONLY:
-                 LOW
-                 MEDIUM
-                 HIGH
-                 CRITICAL
-                 Allowed category values ONLY:
-                 BUG
-                 SECURITY
-                 PERFORMANCE
-                 STYLE
-                 MAINTAINABILITY
-                 Never use any other values.
-                 Return JSON only.
-              
-                 Do not wrap in markdown.
-                 Never wrap with ```json.
-                 Do not explain anything.
-                 The response MUST exactly match this schema:
-                 The "summary" field is REQUIRED.
-                 Never omit it.
-                 Even if no issues are found, return:
-                 {
-                   "summary": "No issues found.",
-                   "comments": []
-                 }
-                 If issues are found, you MUST still include the "summary" field.
-               """);
+              ]
+            }
+
+            Rules:
+            - summary is REQUIRED.
+            - comments is REQUIRED.
+            - If there are no issues:
+              {
+                "summary":"No issues found.",
+                "comments":[]
+              }
+
+            Allowed severity values:
+            LOW
+            MEDIUM
+            HIGH
+            CRITICAL
+
+            Allowed category values:
+            BUG
+            SECURITY
+            PERFORMANCE
+            STYLE
+            MAINTAINABILITY
+
+            NEVER rename any field.
+            NEVER invent new field names.
+            NEVER use:
+            file
+            line
+            issue
+            explanation
+
+            ALWAYS use:
+            fileName
+            lineNumber
+            comment
+            suggestion
+
+            """);
     }
 }

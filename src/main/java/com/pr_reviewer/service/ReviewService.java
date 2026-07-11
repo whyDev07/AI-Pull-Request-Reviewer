@@ -7,6 +7,9 @@ import com.pr_reviewer.integration.ai.AiClient;
 import com.pr_reviewer.integration.ai.AiProperties;
 import com.pr_reviewer.integration.ai.dto.AiResponse;
 import com.pr_reviewer.integration.github.GitHubClient;
+import com.pr_reviewer.integration.github.review.GitHubReviewClient;
+import com.pr_reviewer.integration.github.review.dto.GitHubReviewRequest;
+import com.pr_reviewer.mapper.GitHubReviewMapper;
 import com.pr_reviewer.mapper.PullRequestMapper;
 import com.pr_reviewer.mapper.ReviewMapper;
 import com.pr_reviewer.models.ChangedFile;
@@ -44,6 +47,9 @@ public class ReviewService {
 
     private final AiProperties aiProperties;
     private final AiOutputValidator aiOutputValidator;
+
+    private final GitHubReviewClient gitHubReviewClient;
+    private final GitHubReviewMapper gitHubReviewMapper;
 
     public ReviewResult pullRequestReview(ReviewRequest request) {
 
@@ -86,6 +92,15 @@ public class ReviewService {
         reviewRepository.save(review);
 
         reviewCommentRepository.saveAll(reviewMapper.toComments(review, result.comments()));
+
+        GitHubReviewRequest reviewRequest =
+                gitHubReviewMapper.toRequest(result);
+
+        gitHubReviewClient.publishReview(
+                request.owner(),
+                request.repository(),
+                request.pullRequestNumber(),
+                reviewRequest);
 
         return result;
 

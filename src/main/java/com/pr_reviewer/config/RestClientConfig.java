@@ -19,6 +19,9 @@ public class RestClientConfig {
                 .baseUrl(githubProperties.getBaseUrl())
                 .defaultHeader("Accept", "application/vnd.github+json")
                                 //GitHub REST API media type, return as JSON
+                .defaultHeader("X-GitHub-Api-Version", "2022-11-28")
+                                //This header is recommended by GitHub for the REST API
+                                //small improvement but a good production practice
                 .build();
     }
 }

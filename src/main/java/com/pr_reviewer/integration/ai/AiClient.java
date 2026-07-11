@@ -3,6 +3,7 @@ package com.pr_reviewer.integration.ai;
 import com.pr_reviewer.integration.ai.dto.AiMessage;
 import com.pr_reviewer.integration.ai.dto.AiRequest;
 import com.pr_reviewer.integration.ai.dto.AiResponse;
+import com.pr_reviewer.integration.ai.dto.ResponseFormat;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
@@ -24,44 +25,42 @@ public class AiClient {
     private final AiProperties aiProperties;
 
 
-    public AiResponse reviewCode(String prompt){
+    public AiResponse reviewCode(String prompt) {
         try {
             AiRequest request = new AiRequest(
+
                     aiProperties.getModel(),
-                    List.of(new AiMessage(
+
+                    List.of(
+
+                            new AiMessage(
                                     "system",
                                     """
-                                    You are a Senior Java Backend Engineer.
-                                    Review only the supplied code.
-                                    Never invent issues.
-                                    Never assume missing context.
-                                    Return only valid JSON.
-                                    """
-                            ),
-                            new AiMessage(
-                                    "user",
-                                    prompt)));
+                                            You are a Senior Java Backend Engineer.
+                                            You MUST return ONLY valid JSON.
+                                            Never return markdown.
+                                            Never wrap JSON inside ```.
+                                            Never explain anything.
+                                            Never omit required fields.
+                                            """),
+                            new AiMessage("user", prompt)),
+                    new ResponseFormat("json_object"));
 
             return aiRestClient.post()
                     .body(request)
                     .retrieve()
                     .body(AiResponse.class);
-        }catch (HttpClientErrorException.Unauthorized ex) {
+        } catch (HttpClientErrorException.Unauthorized ex) {
             throw new AiException(HttpStatus.UNAUTHORIZED, "Invalid OpenRouter API Key.");
-        }
-        catch (HttpClientErrorException.Forbidden ex) {
+        } catch (HttpClientErrorException.Forbidden ex) {
             throw new AiException(HttpStatus.FORBIDDEN, "Access denied by OpenRouter.");
-        }
-        catch (HttpClientErrorException.TooManyRequests ex) {
+        } catch (HttpClientErrorException.TooManyRequests ex) {
             throw new AiException(HttpStatus.TOO_MANY_REQUESTS, "OpenRouter rate limit exceeded. Please try again later.");
-        }
-        catch (HttpServerErrorException ex) {
+        } catch (HttpServerErrorException ex) {
             throw new AiException(HttpStatus.BAD_GATEWAY, "OpenRouter is currently unavailable.");
-        }
-        catch (ResourceAccessException ex) {
+        } catch (ResourceAccessException ex) {
             throw new AiException(HttpStatus.GATEWAY_TIMEOUT, "Unable to connect to OpenRouter.");
-        }
-        catch (RestClientException ex) {
+        } catch (RestClientException ex) {
             throw new AiException(HttpStatus.INTERNAL_SERVER_ERROR, "Unexpected error while communicating with OpenRouter.");
         }
     }
