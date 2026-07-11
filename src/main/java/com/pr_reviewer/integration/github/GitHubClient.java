@@ -1,11 +1,11 @@
 package com.pr_reviewer.integration.github;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pr_reviewer.integration.github.dto.GitHubFileResponse;
 import com.pr_reviewer.integration.github.dto.GitHubPullRequestResponse;
 import com.pr_reviewer.models.ChangedFile;
 import com.pr_reviewer.models.PullRequestDetails;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -16,6 +16,7 @@ import org.springframework.web.client.RestClientException;
 
 import java.util.List;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class GitHubClient {
@@ -29,6 +30,10 @@ public class GitHubClient {
             Integer pullRequestNumber,
             String token
     ) {
+        log.info("Fetching GitHub Pull Request #{} from repository {}/{}",
+                pullRequestNumber,
+                owner,
+                repo);
         try {
 
             // RestClient call
@@ -57,11 +62,14 @@ public class GitHubClient {
                             })
                     .body(GitHubPullRequestResponse.class); //Jackson will automatically map it
             if (pullRequestResponse == null) {
+                log.debug("GitHub returned an empty Pull Request response.");
                 throw new GitHubException(
                         HttpStatus.BAD_GATEWAY,
                         "GitHub returned an empty response."
                 );
             }
+
+            log.debug("Successfully fetched GitHub PR. GitHub Id={}", pullRequestResponse.id());
 
             return mapToPullRequestDetails(pullRequestResponse);
 
@@ -69,9 +77,11 @@ public class GitHubClient {
         }
         //Handling exception for interrupted or no internet connection
         catch (ResourceAccessException ex) {
+            log.debug("Unable to connect to GitHub API.");
             throw new GitHubException(HttpStatus.GATEWAY_TIMEOUT, "Unable to connect to GitHub.");
         }
         catch (RestClientException ex) {
+            log.debug("Unexpected exception while calling GitHub API.");
             throw new GitHubException(HttpStatus.BAD_GATEWAY, "Unexpected error while communicating with GitHub.");
         }
 
@@ -99,6 +109,8 @@ public class GitHubClient {
             Integer pullRequestNumber,
             String token
     ){
+        log.debug("Fetching changed files for PR #{}", pullRequestNumber);
+
         List<GitHubFileResponse> response = restClient.get()
                         .uri(uriBuilder -> uriBuilder
                                         .path("/repos/{owner}/{repo}/pulls/{number}/files")
@@ -110,8 +122,11 @@ public class GitHubClient {
                         // ParameterizedTypeReference tells Spring this JSON array
                         // should be deserialized into List<GitHubFileResponse>.
         if (response == null) {
+            log.debug("GitHub returned {} changed file(s).", response.size());
             return List.of();
         }
+        log.debug("GitHub returned {} changed file(s).", response.size());
+
         return response.stream()
                 .map(this::mapToChangedFile)
                 .toList();
