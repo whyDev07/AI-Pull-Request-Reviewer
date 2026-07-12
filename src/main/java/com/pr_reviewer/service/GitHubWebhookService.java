@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class GitHubWebhookService {
 
-    private final ReviewService reviewService;
+    private final AsyncReviewService asyncReviewService;
     private final GitHubProperties gitHubProperties;
 
     public void processWebhook(String event, GitHubWebhookPayload payload) {
@@ -42,14 +42,13 @@ public class GitHubWebhookService {
                 payload.repository().owner().login(),
                 payload.repository().name());
 
-        reviewService.pullRequestReview(
+        asyncReviewService.processReview(
                 payload.repository().owner().login(),
                 payload.repository().name(),
                 payload.pull_request().number(),
                 gitHubProperties.getToken()
         );
 
-        log.info("Webhook processing completed for PR #{}",
-                payload.pull_request().number());
+        log.info("Review submitted to background executor for PR #{}", payload.pull_request().number());
     }
 }
