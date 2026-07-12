@@ -5,9 +5,11 @@ import com.pr_reviewer.models.ReviewResult;
 import com.pr_reviewer.service.ReviewService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/review")
 @RequiredArgsConstructor
@@ -19,8 +21,15 @@ public class ReviewController {
     public ResponseEntity<ReviewResult> review(
             @Valid @RequestBody ReviewRequest request) {
 
-        return ResponseEntity.ok(
-                reviewService.pullRequestReview(request)
-        );
+        log.info("Received manual review request for PR #{} in repository {}/{}",
+                request.pullRequestNumber(),
+                request.owner(),
+                request.repository());
+
+        ReviewResult result = reviewService.pullRequestReview(request);
+        log.info("Successfully completed manual review request for PR #{}",
+                request.pullRequestNumber());
+
+        return ResponseEntity.ok(result);
     }
 }

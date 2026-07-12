@@ -2,6 +2,7 @@ package com.pr_reviewer.exception;
 
 import com.pr_reviewer.integration.ai.AiException;
 import com.pr_reviewer.integration.github.GitHubException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -9,12 +10,15 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.time.LocalDateTime;
 
+@Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(GitHubException.class)
     public ResponseEntity<ApiErrorResponse> handleGitHubException(
             GitHubException ex) {
+
+        log.error("GitHub exception occurred: {}", ex.getMessage(), ex);
 
         ApiErrorResponse error = ApiErrorResponse.builder()
                 .timestamp(LocalDateTime.now())
@@ -28,10 +32,11 @@ public class GlobalExceptionHandler {
                 .body(error);
     }
 
-
     @ExceptionHandler(AiException.class)
     public ResponseEntity<ApiErrorResponse> handleAiException(
             AiException ex) {
+
+        log.error("AI exception occurred: {}", ex.getMessage(), ex);
 
         ApiErrorResponse error = ApiErrorResponse.builder()
                 .timestamp(LocalDateTime.now())
@@ -46,8 +51,11 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(ApiException.class)
-    public ResponseEntity<ApiErrorResponse> handleReviewResponseException(
-            ApiException ex){
+    public ResponseEntity<ApiErrorResponse> handleApiException(
+            ApiException ex) {
+
+        log.error("Application exception occurred: {}", ex.getMessage(), ex);
+
         ApiErrorResponse error = ApiErrorResponse.builder()
                 .timestamp(LocalDateTime.now())
                 .status(ex.getStatus().value())
@@ -55,11 +63,16 @@ public class GlobalExceptionHandler {
                 .message(ex.getMessage())
                 .build();
 
-        return ResponseEntity.status(ex.getStatus()).body(error);
+        return ResponseEntity
+                .status(ex.getStatus())
+                .body(error);
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ApiErrorResponse> handleException(Exception ex) {
+    public ResponseEntity<ApiErrorResponse> handleException(
+            Exception ex) {
+
+        log.error("Unhandled exception occurred.", ex);
 
         ApiErrorResponse error = ApiErrorResponse.builder()
                 .timestamp(LocalDateTime.now())

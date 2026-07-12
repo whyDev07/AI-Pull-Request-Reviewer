@@ -22,12 +22,13 @@ import com.pr_reviewer.service.ai.AiOutputValidator;
 import com.pr_reviewer.service.ai.PromptBuilder;
 import com.pr_reviewer.service.ai.ReviewParser;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -55,43 +56,59 @@ public class ReviewService {
 
         long start = System.currentTimeMillis();
 
+        log.info("Starting AI review for PR #{} in repository {}/{}",
+                request.pullRequestNumber(),
+                request.owner(),
+                request.repository());
+
         PullRequestDetails details = gitHubClient.getPullRequest(
                 request.owner(),
                 request.repository(),
                 request.pullRequestNumber(),
                 request.githubToken()
         );
+        log.debug("Successfully fetched PR details. GitHub PR Id={}", details.githubId());
 
         List<ChangedFile> files = gitHubClient.getChangedFiles(
                 request.owner(),
                 request.repository(),
                 request.pullRequestNumber(),
                 request.githubToken());
+        log.debug("Fetched {} changed file(s) from GitHub.", files.size());
 
         String prompt = promptBuilder.buildPrompt(details, files);
+        log.debug("Prompt generated successfully. Length={} characters.", prompt.length());
 
         AiResponse aiResponse = aiClient.reviewCode(prompt);
 
         ReviewResult result = reviewParser.parse(aiResponse);
+
         aiOutputValidator.validate(result);
 
-        //Saving all the changes in db
         PullRequest pullRequest =
                 pullRequestRepository
                         .findByGithubPrId(details.githubId())
-                        .orElseGet(() ->
-                                pullRequestRepository.save(
-                                        pullRequestMapper.toEntity(details, request)));
+                        .orElseGet(() -> {
+                            log.info("Pull Request not found in database. Creating new record.");
+                            return pullRequestRepository.save(
+                                    pullRequestMapper.toEntity(details, request));
+                        });
+
         long processingTime = System.currentTimeMillis() - start;
+
         Review review = reviewMapper.toEntity(
                 pullRequest,
                 result,
                 aiResponse,
                 aiProperties.getModel(),
                 processingTime);
-        reviewRepository.save(review);
 
-        reviewCommentRepository.saveAll(reviewMapper.toComments(review, result.comments()));
+        reviewRepository.save(review);
+        log.info("Review persisted successfully with id={}", review.getId());
+
+        reviewCommentRepository.saveAll(
+                reviewMapper.toComments(review, result.comments()));
+        log.info("Saved {} review comment(s).", result.comments().size());
 
         GitHubReviewRequest reviewRequest =
                 gitHubReviewMapper.toRequest(result);
@@ -101,17 +118,25 @@ public class ReviewService {
                 request.repository(),
                 request.pullRequestNumber(),
                 reviewRequest);
+        log.info("Successfully published AI review to GitHub.");
+
+        log.info("Review completed successfully in {} ms.",
+                processingTime);
 
         return result;
-
     }
 
-    //Creating an overload for the webhooks as it doesn't need Review request
-    public ReviewResult pullRequestReview(String owner, String repository,
-                                          Integer prNumber, String githubToken)
-    {
-        ReviewRequest request = new ReviewRequest(owner, repository,
-                                                    prNumber, githubToken);
+    public ReviewResult pullRequestReview(
+            String owner,
+            String repository,
+            Integer prNumber,
+            String githubToken
+    ) {
+
+        ReviewRequest request =
+                new ReviewRequest(owner, repository,
+                        prNumber, githubToken);
+
         return pullRequestReview(request);
     }
 }
