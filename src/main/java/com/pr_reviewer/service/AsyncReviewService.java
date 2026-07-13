@@ -22,6 +22,6 @@ public class AsyncReviewService {
         ReviewRequest request = new ReviewRequest(owner, repository, prNumber, githubToken);
 
         reviewService.pullRequestReview(request);
-        log.info("Background review completed for PR #{}", prNumber);
+        log.info("Background review completed-for PR #{}", prNumber);
     }
 }

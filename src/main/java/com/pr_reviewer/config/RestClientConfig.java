@@ -2,10 +2,12 @@ package com.pr_reviewer.config;
 
 import com.pr_reviewer.integration.github.GitHubProperties;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestClient;
 
+@Slf4j
 @Configuration
 @RequiredArgsConstructor
 public class RestClientConfig {
@@ -14,7 +16,7 @@ public class RestClientConfig {
 
     @Bean
     public RestClient restClient() {
-        System.out.println("Base URL = " + githubProperties.getBaseUrl());
+        log.info("GitHub RestClient configured with base URL {}", githubProperties.getBaseUrl());
         return RestClient.builder()
                 .baseUrl(githubProperties.getBaseUrl())
                 .defaultHeader("Accept", "application/vnd.github+json")
